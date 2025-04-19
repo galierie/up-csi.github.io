@@ -1,31 +1,24 @@
-import eslint from '@eslint/js';
-import eslintPluginSvelte from 'eslint-plugin-svelte';
-import eslintPrettierConfig from 'eslint-config-prettier';
 import globals from 'globals';
+import js from '@eslint/js';
+import prettierConfig from 'eslint-config-prettier';
+import svelte from 'eslint-plugin-svelte';
 import svelteParser from 'svelte-eslint-parser';
-import tsEslint from 'typescript-eslint';
+import svelteConfig from './svelte.config.js';
+import ts from 'typescript-eslint';
 
-export default tsEslint.config(
-    eslint.configs.recommended,
-    ...eslintPluginSvelte.configs['flat/recommended'],
-    ...eslintPluginSvelte.configs['flat/prettier'],
-    ...tsEslint.configs.recommended,
+export default ts.config(
+    js.configs.recommended,
+    ...ts.configs.recommended,
+    ...svelte.configs['flat/recommended'],
+    ...svelte.configs['flat/prettier'],
+
     {
-        files: ['**/*.svelte'],
         languageOptions: {
-            parser: svelteParser,
-            parserOptions: {
-                parser: tsEslint.parser,
-                extraFileExtensions: ['.svelte'],
-            },
+            globals: {
+                ...globals.browser,
+                ...globals.node
+            }
         },
-        rules: {
-            'svelte/no-at-html-tags': 'warn',
-            'svelte/require-each-key': 'off',
-        },
-    },
-    {
-        languageOptions: { globals: { ...globals.browser, ...globals.node } },
         rules: {
             '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
             'no-constant-binary-expression': 'error',
@@ -113,8 +106,27 @@ export default tsEslint.config(
             yoda: ['warn', 'never', { exceptRange: true }],
         },
     },
+
+    {
+        files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
+        languageOptions: {
+            parser: svelteParser,
+            parserOptions: {
+				projectService: true,
+                parser: ts.parser,
+                extraFileExtensions: ['.svelte'],
+                svelteConfig,
+            },
+        },
+        rules: {
+            'svelte/no-at-html-tags': 'warn',
+            'svelte/require-each-key': 'off',
+        },
+    },
+
     {
         ignores: ['node_modules/**/*', '.svelte-kit/**/*', 'build/**/*'],
     },
-    eslintPrettierConfig,
+
+    prettierConfig,
 );
