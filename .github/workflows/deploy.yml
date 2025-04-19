@@ -21,27 +21,20 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install Latest Corepack
-        run: npm install -g corepack@latest
-      - name: Enable Corepack for `pnpm`
-        run: corepack enable
-      - name: Get `pnpm` Store Directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-      - uses: actions/cache@v4
-        name: Setup `pnpm` Cache
+      - name: Install Node.js
+        uses: actions/setup-node@v4
         with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
+          node-version: latest
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          run_install: false
       - name: Install Dependencies
         run: pnpm install
-      - name: Check Formatting
-        run: pnpm fmt
       - name: Synchronize SvelteKit
         run: pnpm sync
+      - name: Check Formatting
+        run: pnpm fmt
       - name: Check All Lints in Parallel
         run: pnpm lint
       - name: Build Website
